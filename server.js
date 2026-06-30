@@ -24,7 +24,7 @@ app.use(session({
   saveUninitialized: false
 }));
 
-// Setup Local File Upload Storage Engine (Option B Fallback)
+// Setup Local File Upload Storage Engine
 const storage = multer.diskStorage({
   destination: './public/uploads/',
   filename: (req, file, cb) => {
@@ -62,10 +62,14 @@ app.use(async (req, res, next) => {
 
 // 5. APPLICATION ROUTES
 
-// Homepage Layout (Shows everything across all categories)
+// Homepage Layout (Hides main tab contents from the primary index view)
 app.get('/', async (req, res) => {
   try {
-    const videos = await Video.find();
+    // Only fetch videos that do NOT match our primary navbar filter headers
+    const videos = await Video.find({ 
+      category: { $nin: ['Music', 'Sports', 'Movies', 'Live TV'] } 
+    });
+    
     const categories = [...new Set(videos.map(v => v.category))];
     res.render('home', { videos, categories, currentCategory: null });
   } catch (err) {
@@ -73,7 +77,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Category Filtering Endpoint (Makes Live TV, Sports, Movies, Music tabs work!)
+// Category Filtering Endpoint (Makes Music, Live TV, Sports, Movies tabs display their unique feeds)
 app.get('/category/:name', async (req, res) => {
   try {
     const targetCategory = req.params.name;
@@ -128,7 +132,7 @@ app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));
 });
 
-// Streaming Dashboard
+// Streaming Dashboard Control Hub
 app.get('/upload', (req, res) => {
   if (!req.session.userId) return res.redirect('/login');
   res.render('upload');
