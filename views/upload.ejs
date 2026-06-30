@@ -2,24 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Upload Content</title>
+  <title>FlixBox Control Room — Broadcast Hub</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="form-container">
-    <h2>📤 Broadcast New Video/Match</h2>
+    <h2>📤 Broadcast New Feed Channel</h2>
     <form method="POST" action="/upload" enctype="multipart/form-data">
-      <input name="title" placeholder="Video Title (e.g. Bangladesh vs India Live)" required>
-      <input name="category" placeholder="Category (e.g. Live Sports, Movies, Drama)" required>
+      <input name="title" placeholder="Stream Name (e.g., Rock Live Concert)" required>
       
+      <input name="category" placeholder="Category (Match Exactly: Live TV, Sports, Movies, Music)" required>
+      
+      <div style="border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.01)">
+        <p style="margin-top:0; color:var(--text-muted); font-size:13px;">🎨 Cover Art Image Poster URL</p>
+        <input name="posterUrl" placeholder="https://images.unsplash.com/... or any .jpg/.png link">
+      </div>
+
       <label class="checkbox-label">
-        <input type="checkbox" name="isPremium"> Paywall Content (Requires Subscription Tier)
+        <input type="checkbox" name="isPremium"> Paywall Content (Requires Premium Account)
       </label>
       
-      <input type="file" name="video" accept="video/mp4,video/mkv" required>
-      <button type="submit" class="btn signup-btn">Publish to Stream Feed</button>
+      <div style="border: 1px dashed rgba(255,107,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <p style="margin-top:0; color:var(--text-muted); font-size:13px;">Option A: Paste Live URL Link (.m3u8 stream profile)</p>
+        <input name="liveUrl" placeholder="https://example.com/live/stream.m3u8">
+      </div>
+
+      <div style="border: 1px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <p style="margin-top:0; color:var(--text-muted); font-size:13px;">Option B: Or Upload Local File Video Asset</p>
+        <input type="file" name="video" accept="video/mp4,video/mkv">
+      </div>
+
+      <button type="submit" class="btn primary-btn" style="width:100%; padding:12px;">Publish Live Feed</button>
     </form>
-    <p><a href="/">Cancel and Back</a></p>
+    <p style="text-align:center; margin-top:20px;"><a href="/" class="action-player-link">⬅ Back to Dashboard</a></p>
   </div>
 </body>
 </html>
