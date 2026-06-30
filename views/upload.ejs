@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Content</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>📤 Broadcast New Video/Match</h2>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+      <input name="title" placeholder="Video Title (e.g. Bangladesh vs India Live)" required>
+      <input name="category" placeholder="Category (e.g. Live Sports, Movies, Drama)" required>
+      
+      <label class="checkbox-label">
+        <input type="checkbox" name="isPremium"> Paywall Content (Requires Subscription Tier)
+      </label>
+      
+      <input type="file" name="video" accept="video/mp4,video/mkv" required>
+      <button type="submit" class="btn signup-btn">Publish to Stream Feed</button>
+    </form>
+    <p><a href="/">Cancel and Back</a></p>
+  </div>
+</body>
+</html>

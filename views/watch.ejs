@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Watching: <%= video.title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="player-container">
+    <h2>📺 Now Streaming: <%= video.title %></h2>
+    <video width="100%" controls autoplay controlsList="nodownload">
+      <source src="<%= video.filePath %>" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <p><a href="/" class="btn back-btn">⬅ Back to Browse</a></p>
+  </div>
+</body>
+</html>
