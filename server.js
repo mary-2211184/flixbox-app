@@ -1,4 +1,4 @@
-// 1. DIRECT DNS PATCH (Crucial for bypassing local ISP blocks)
+// 1. DIRECT DNS PATCH (Bypasses local ISP blocks)
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 4. MONGODB INSTANCE SCHEMAS
+// 4. DATABASE MODELS
 const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true }
@@ -44,16 +44,15 @@ const VideoSchema = new mongoose.Schema({
   title: { type: String, required: true },
   category: { type: String, required: true },
   isPremium: { type: Boolean, default: false },
-  filePath: { type: String, required: true } // Can hold local paths or external .m3u8 URLs
+  filePath: { type: String, required: true },
+  posterUrl: { type: String, default: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1364&auto=format&fit=crop' }
 });
 const Video = mongoose.model('Video', VideoSchema);
 
-// Safe Database Connection Management
+// Database Connection Manager
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('🚀 Database connected successfully to FlixBox Cluster!'))
   .catch(err => console.error('Database connection error:', err.message));
-
-// 5. APPLICATION ROUTES
 
 // Middleware to inject user data into EJS views automatically
 app.use(async (req, res, next) => {
@@ -61,14 +60,32 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Homepage Layout (Fetches feeds and groupings)
+// 5. APPLICATION ROUTES
+
+// Homepage Layout (Shows everything across all categories)
 app.get('/', async (req, res) => {
   try {
     const videos = await Video.find();
     const categories = [...new Set(videos.map(v => v.category))];
-    res.render('home', { videos, categories });
+    res.render('home', { videos, categories, currentCategory: null });
   } catch (err) {
     res.status(500).send('Error rendering home screen: ' + err.message);
+  }
+});
+
+// Category Filtering Endpoint (Makes Live TV, Sports, Movies, Music tabs work!)
+app.get('/category/:name', async (req, res) => {
+  try {
+    const targetCategory = req.params.name;
+    const videos = await Video.find({ category: targetCategory });
+    
+    res.render('home', { 
+      videos, 
+      categories: [targetCategory], 
+      currentCategory: targetCategory 
+    });
+  } catch (err) {
+    res.status(500).send('Error loading category: ' + err.message);
   }
 });
 
@@ -91,7 +108,7 @@ app.post('/signup', async (req, res) => {
     await User.create({ email, password });
     res.redirect('/login');
   } catch (err) {
-    res.send('Registration failed: Name might already exist.');
+    res.send('Registration failed: Username might already exist.');
   }
 });
 
@@ -111,7 +128,7 @@ app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));
 });
 
-// Streaming & Link Publication Dashboard
+// Streaming Dashboard
 app.get('/upload', (req, res) => {
   if (!req.session.userId) return res.redirect('/login');
   res.render('upload');
@@ -121,10 +138,9 @@ app.post('/upload', upload.single('video'), async (req, res) => {
   try {
     if (!req.session.userId) return res.redirect('/login');
     
-    const { title, category, isPremium, liveUrl } = req.body;
+    const { title, category, isPremium, liveUrl, posterUrl } = req.body;
     let finalPath = '';
 
-    // Check if user pasted a live streaming link (.m3u8) or uploaded a file
     if (liveUrl && liveUrl.trim() !== '') {
       finalPath = liveUrl.trim();
     } else if (req.file) {
@@ -135,9 +151,10 @@ app.post('/upload', upload.single('video'), async (req, res) => {
 
     await Video.create({
       title,
-      category,
+      category: category.trim(),
       isPremium: isPremium === 'on',
-      filePath: finalPath
+      filePath: finalPath,
+      posterUrl: posterUrl && posterUrl.trim() !== '' ? posterUrl.trim() : undefined
     });
 
     res.redirect('/');
@@ -146,7 +163,7 @@ app.post('/upload', upload.single('video'), async (req, res) => {
   }
 });
 
-// 6. DYNAMIC CLOUD PORT BINDING (Ready for Render deployment!)
+// 6. DYNAMIC CLOUD PORT BINDING
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
