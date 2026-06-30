@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlixBox — Watch Live TV, Sports & Premium Streams</title>
+  <title>FlixBox — Watch Live TV, Sports, Movies & Music</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -12,10 +12,11 @@
     <div class="logo-container">
       <div class="logo">Flix<span>Box</span></div>
       <nav class="nav-links">
-        <a href="/" class="nav-item active">Home</a>
-        <a href="#" class="nav-item">Live TV</a>
-        <a href="#" class="nav-item">Sports</a>
-        <a href="#" class="nav-item">Movies</a>
+        <a href="/" class="nav-item <%= !currentCategory ? 'active' : '' %>">Home</a>
+        <a href="/category/Live TV" class="nav-item <%= currentCategory === 'Live TV' ? 'active' : '' %>">Live TV</a>
+        <a href="/category/Sports" class="nav-item <%= currentCategory === 'Sports' ? 'active' : '' %>">Sports</a>
+        <a href="/category/Movies" class="nav-item <%= currentCategory === 'Movies' ? 'active' : '' %>">Movies</a>
+        <a href="/category/Music" class="nav-item <%= currentCategory === 'Music' ? 'active' : '' %>">Music</a>
       </nav>
     </div>
     
@@ -40,9 +41,9 @@
   </div>
 
   <main class="main-layout-container">
-    <% if (categories.length === 0) { %>
+    <% if (categories.length === 0 || videos.length === 0) { %>
       <div style="text-align: center; padding: 60px; color: var(--text-muted);">
-        <p>No streams or configurations found in your distribution network.</p>
+        <p>No active streams or content found in this category.</p>
         <% if (user) { %>
           <a href="/upload" class="btn primary-btn">Deploy First Stream Target</a>
         <% } %>
@@ -50,35 +51,43 @@
     <% } %>
 
     <% categories.forEach(cat => { %>
-      <section class="category-section">
-        <div class="category-title-flex">
-          <h2>🍿 <%= cat %></h2>
-        </div>
-        
-        <div class="video-slider-track">
-          <% videos.filter(v => v.category === cat).forEach(v => { %>
-            <div class="video-card">
-              <div class="thumbnail-canvas">
-                📺
-                <div class="live-indicator-tag">
-                  <div class="live-dot"></div> Live
+      <% const catVideos = videos.filter(v => v.category === cat); %>
+      <% if (catVideos.length > 0) { %>
+        <section class="category-section">
+          <div class="category-title-flex">
+            <h2>🍿 <%= cat %></h2>
+          </div>
+          
+          <div class="video-slider-track">
+            <% catVideos.forEach(v => { %>
+              <a href="/watch/<%= v._id %>" class="video-card">
+                <div class="thumbnail-wrapper">
+                  <img src="<%= v.posterUrl %>" class="thumbnail-img" alt="<%= v.title %>" loading="lazy">
+                  
+                  <div class="play-overlay">
+                    <div class="play-icon-circle">▶</div>
+                  </div>
+                  
+                  <div class="live-indicator-tag">
+                    <div class="live-dot"></div> Live
+                  </div>
                 </div>
-              </div>
-              <div class="card-metadata">
-                <h3><%= v.title %></h3>
-                <div class="badge-wrapper">
-                  <% if (v.isPremium) { %>
-                    <span class="badge access-badge badge-premium">Premium</span>
-                  <% } else { %>
-                    <span class="badge access-badge badge-free">Free Feed</span>
-                  <% } %>
-                  <a href="/watch/<%= v._id %>" class="action-player-link">Watch ➔</a>
+                <div class="card-metadata">
+                  <h3><%= v.title %></h3>
+                  <div class="badge-wrapper">
+                    <% if (v.isPremium) { %>
+                      <span class="badge access-badge badge-premium">Premium</span>
+                    <% } else { %>
+                      <span class="badge access-badge badge-free">Free Feed</span>
+                    <% } %>
+                    <span class="action-player-link">Watch Now</span>
+                  </div>
                 </div>
-              </div>
-            </div>
-          <% }) %>
-        </div>
-      </section>
+              </a>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
     <% }) %>
   </main>
 
